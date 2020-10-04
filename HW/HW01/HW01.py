@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+import os
 
 # 矩陣相加
 def AddMatrix(a, b):
@@ -152,21 +154,6 @@ def LSEerrorMatrix(a, b):
             
     return error
 
-# load data from txt and "allData" is string
-f = open("testfile.txt")
-allData = f.read()
-f.close()
-
-# transform data type from string to list
-data = []
-for ele in allData.split():
-    ele = ele.split(",")
-    data.append(ele)
-
-for i in range(0, len(data)):
-    for j in range(0, len(data[0])):
-        data[i][j] = float(data[i][j])
-
 # Design Matrix
 def GetDesignMatrix(input_m, n):
     design_m = []
@@ -271,8 +258,43 @@ def PlotLSE(data, coef_array):
     plt.plot(x, y)
     plt.show()
 
-x1 = rLSE(data, 3, 10000)
-PlotLSE(data, x1)
+def PrintInfo(data, x, type_name):
+    type_str = type_name + ":\nFitting line: "
+    for i in range(len(x), 0, -1):
+        tmp = "(" + str(x[i-1][0]) + ") "
+        type_str += tmp
+        if i-1 != 0:
+            type_str += "X^" + str(i-1) + " + "
+    print(f'{type_str}\nTotal Error: {LSEerror(data, x)}')
 
-x2 = NewtonMethod(data, 3)
-PlotLSE(data, x2)
+filename = sys.argv[1]
+if os.path.isfile(filename):
+    print(filename)
+power = int(sys.argv[2])
+lam = int(sys.argv[3])
+
+# load data from txt and "allData" is string
+f = open(filename)
+allData = f.read()
+f.close()
+
+# transform data type from string to list
+data = []
+for ele in allData.split():
+    ele = ele.split(",")
+    data.append(ele)
+
+for i in range(0, len(data)):
+    for j in range(0, len(data[0])):
+        data[i][j] = float(data[i][j])
+
+x1 = rLSE(data, power, lam)
+PrintInfo(data, x1, "LSE")
+
+print()
+
+x2 = NewtonMethod(data, power)
+PrintInfo(data, x2, "Newton's Method")
+
+# PlotLSE(data, x1)
+# PlotLSE(data, x2)
