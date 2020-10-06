@@ -27,7 +27,13 @@ def HessionMatrix(data, power):
     design_m = GetDesignMatrix(data, power)
     design_m_t = Transpose(design_m)
     AtA = MultifyMatrix(design_m_t, design_m)
-    hession_m = np.linalg.inv(MultipleMatrix(AtA, 2)).tolist()
+    
+    L, U = LUdecomp(MultipleMatrix(AtA, 2))
+
+    inv_L = InverseLower(L)
+    inv_U = InverseUpper(U)
+    
+    hession_m = MultifyMatrix(inv_U, inv_L)
     
     return hession_m
 

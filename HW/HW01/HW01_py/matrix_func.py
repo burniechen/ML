@@ -96,29 +96,112 @@ def LUdecomp(input_m):
     
     return [lower_m, input_m]
 
-# 利用ＬＵ分解求解
-def GetSolByLU(regular_m, b):
-    A = LUdecomp(regular_m)
-    L = A[0]
-    U = A[1]
+def GetCofactor(input_m, p, q):
+    n = len(input_m)
 
-    # Ly = b，先求y，上到下
-    y = []
-    for i in range(0, len(L)):
-        val = b[i][0]
-        for j in range(0, i):
-            val -= L[i][j] * y[j][0]
-        y.append([val])
-    
-    # Ux = y，在求x，下到上
-    x = []
-    for i in range(0, len(U)):
-        x.append([0])
+    tmp1 = []
+    tmp2 = []
 
-    for i in range(len(U), 0, -1):
-        val = y[i-1][0]
-        for j in range(len(U), i, -1):
-            val -= U[i-1][j-1] * x[j-1][0]
-        x[i-1][0] = val / U[i-1][i-1]
+    for i in range(0, n):
+        for j in range(0, n):
+            if i != p and j != q:
+                tmp1.append(input_m[i][j])
+
+    for i in range(0, len(tmp1), n-1):
+        tmp2.append(tmp1[i:i+n-1])
+
+    return tmp2
+
+def Determinant(input_m):
+    n = len(input_m)
     
-    return x
+    if n == 1:
+        return input_m[0][0]
+
+    sign = 1
+    
+    val = 0
+
+    for i in range(0, n):
+        tmp = GetCofactor(input_m, 0, i)
+        val += sign * input_m[0][i] * Determinant(tmp)
+        
+        sign = -sign
+        
+    return val
+
+def GetAdjoint(input_m):
+    n = len(input_m)
+    tmp = []
+    
+    for i in range(0, n):
+        tmp.append([])
+        for j in range(0, n):
+            cof = GetCofactor(input_m, i, j)
+            val = pow(-1, i+j) * Determinant(cof)
+            tmp[i].append(val)
+    tmp = Transpose(tmp)
+    
+    return tmp
+
+# 反矩陣
+def Inverse(input_m):
+    determinant = Determinant(input_m)
+    if determinant == 0:
+        print("It's a singular matrix")
+        return
+    
+    adjoint_m = GetAdjoint(input_m)
+    inverse_m = MultipleMatrix(adjoint_m, 1/determinant)
+    
+    return inverse_m
+
+# 三角矩陣行列式值
+def TriangleDeterminant(T):
+    n = len(T)
+    det = 1
+    
+    # 對角相乘
+    for i in range(0, n):
+        det *= T[i][i]
+    return det
+
+def InverseLower(L):
+    tmp = []
+    n = len(L)
+    det = TriangleDeterminant(L)
+    if det == 0:
+        print("It's a singular matrix")
+        return
+    
+    for i in range(0, n):
+        tmp.append([])
+        for j in range(0, n):
+            val = 0
+            if i > j:
+                cof = GetCofactor(L, j, i)
+                val = pow(-1, i+j) * Determinant(cof) / det
+            elif i == j:
+                val = 1 / L[i][j]
+            tmp[i].append(val)
+    return tmp
+
+def InverseUpper(U):
+    tmp = []
+    n = len(U)
+    det = TriangleDeterminant(U)
+    if det == 0:
+        print("It's a singular matrix")
+        return
+    
+    for i in range(0, n):
+        tmp.append([])
+        for j in range(0, n):
+            val = 0
+            if i < j:
+                cof = GetCofactor(U, j, i)
+                val = pow(-1, i+j) * Determinant(cof) / det
+            elif i == j:
+                val = 1 / U[i][j]
+            tmp[i].append(val)
+    return tmp
