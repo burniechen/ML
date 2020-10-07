@@ -40,16 +40,9 @@ def HessionMatrix(data, power):
 def NewtonMethod(data, power):
     x_bef = np.random.uniform(low=min(data)[0], high=max(data)[1], size=(power,1)).tolist()
     
-    error = 99.9
-    
-    while(error > 0.01):
-        gradient_m = GradientMatrix(data, power, x_bef)
-        hession_m = HessionMatrix(data, power)
+    gradient_m = GradientMatrix(data, power, x_bef)
+    hession_m = HessionMatrix(data, power)
 
-        x_aft = SubtractMatrix(x_bef, MultifyMatrix(hession_m, gradient_m))
-
-        error = LSEerrorMatrix(x_aft, x_bef)
-        
-        x_bef = x_aft
+    x_aft = SubtractMatrix(x_bef, MultifyMatrix(hession_m, gradient_m))
     
     return x_aft
