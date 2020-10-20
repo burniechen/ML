@@ -53,10 +53,13 @@ def GetPredictValue(i):
 
     for label in range(10):
         normal = posterior_m[label] / total
-        # print(f'{label} : {normal}')
+        print(f'{label} : {normal}')
         posterior_normalize.append(normal)
 
-    return np.argmin(posterior_normalize)
+    ans = np.argmin(posterior_normalize)
+    print(f'Prediction: {test_label_data[i]}, Ans: {ans}\n')
+
+    return ans
 
 train_image = 'train-images-idx3-ubyte.gz'
 train_label = 'train-labels-idx1-ubyte.gz'
@@ -86,7 +89,7 @@ test_label_data, test_label_num = data
 train_index = GetIndexOfEachLabel(train_label_data)
 train_mean_var = GetMeanVarOfEachPixel(train_image_data, train_index)
 
-data_num = 10000
+data_num = 10
 
 # Continuous mode
 error = 0
@@ -94,4 +97,4 @@ for i in range(data_num):
     predict_val = GetPredictValue(i)
     if predict_val != test_label_data[i]:
         error += 1
-print(f'Continuous mode \nError rate : {error / data_num}')
+print(f'Error rate : {error / data_num}')

@@ -50,10 +50,13 @@ def GetPredictValueDC(i):
 
     for label in range(10):
         normal = posterior_m[label] / total
-        # print(f'{label} : {normal}')
+        print(f'{label} : {normal}')
         posterior_normalize.append(normal)
-        
-    return np.argmin(posterior_normalize)
+
+    ans = np.argmin(posterior_normalize)
+    print(f'Prediction: {test_label_data[i]}, Ans: {ans}\n')
+
+    return ans
 
 def PrintClassifyImage(label):
     image = []
@@ -70,8 +73,8 @@ def PrintClassifyImage(label):
     
     for i in range(28):
         for j in range(28):
-            print(image[i][j], " ", end = "")
-        print('\n')
+            print(image[i][j], "", end = "")
+        print("")
 
 train_image = 'train-images-idx3-ubyte.gz'
 train_label = 'train-labels-idx1-ubyte.gz'
@@ -109,7 +112,7 @@ prob_each_bin = [] # 10 * 784 * 32
 for label in range(10):
     prob_each_bin.append(GetProbOfEachBin(label))
 
-data_num = 10
+data_num = 10000
 
 # Discrete mode
 error = 0
@@ -117,9 +120,11 @@ for i in range(data_num):
     predict_val = GetPredictValueDC(i)
     if predict_val != test_label_data[i]:
         error += 1
-print(f'Discrete mode \nError rate : {error / data_num}')
+print(f'Error rate : {error / data_num}\n')
+
+print(f'Imagination of numbers in Bayesian classifier:\n')
 
 for label in range(10):
     print(f'{label}：\n')
     PrintClassifyImage(label)
-    print('\n\n')
+    print('\n')
