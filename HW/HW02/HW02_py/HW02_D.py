@@ -2,54 +2,10 @@ import gzip
 import numpy as np
 from numpy import pi as pi
 
-def GetImageData(f):
-    # magic number
-    f.read(4) 
-    
-    # number of images
-    num = f.read(4)
-    num = int.from_bytes(num, byteorder='big') #60000
-
-    row = f.read(4)
-    row = int.from_bytes(row, byteorder='big') #28
-
-    column = f.read(4)
-    column = int.from_bytes(column, byteorder='big') #28
-
-    buf = f.read(row * column * num)
-    data = np.frombuffer(buf, dtype=np.uint8).astype(np.float32)
-    data = data.reshape(num, row * column)
-    
-    return [data, num, row, column]
-
-def GetLabelData(f):
-    # magic number
-    f.read(4) 
-
-    # number of items
-    num = f.read(4)
-    num = int.from_bytes(num, byteorder='big') #60000
-
-    buf = f.read(num)
-    data = np.frombuffer(buf, dtype=np.uint8)
-    data = data.reshape(num)
-    
-    return [data, num]
-
-def GetIndexOfEachLabel(label_data):
-    index = 0
-    index_m = []
-    for num in range(10):
-        index_m.append([])
-        for label in label_data:
-            if label == num:
-                index_m[num].append(index)
-            index += 1
-        index = 0
-        
-    return index_m
+from data_prepare import *
 
 # -----------Discrete mode-----------
+
 def GetProbOfEachBin(label):
     tmp = []
     count = []
@@ -141,17 +97,19 @@ f = gzip.open(test_label,'rb')
 data = GetLabelData(f)
 test_label_data, test_label_num = data
 
+# For Prior
 train_index = GetIndexOfEachLabel(train_label_data)
+# For Likelihood
 test_index = GetIndexOfEachLabel(test_label_data)
 
 # Tally the frequency of the values of each pixel into 32 bins
 test_image_classify = np.trunc(test_image_data / 8).astype(int)
 
-prob_each_bin = []
+prob_each_bin = [] # 10 * 784 * 32
 for label in range(10):
     prob_each_bin.append(GetProbOfEachBin(label))
 
-data_num = 10000
+data_num = 10
 
 # Discrete mode
 error = 0
@@ -162,6 +120,6 @@ for i in range(data_num):
 print(f'Discrete mode \nError rate : {error / data_num}')
 
 for label in range(10):
-    print(f'{label}：')
+    print(f'{label}：\n')
     PrintClassifyImage(label)
-    print('\n\n\n')
+    print('\n\n')
