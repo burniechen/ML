@@ -53,8 +53,8 @@ def GetIndexOfEachLabel(label_data):
 def GetProbOfEachBin(label):
     tmp = []
     count = []
-    for i in train_index[label]:
-        tmp.append(train_image_classify[i])
+    for i in test_index[label]:
+        tmp.append(test_image_classify[i])
 
     tmp = np.array(tmp).transpose()
     
@@ -66,8 +66,8 @@ def GetProbOfEachBin(label):
         tmp_c = []
 
     count = np.array(count).transpose()
-    count = np.where(count == 0, 0.000001, count)
-    prob = count / len(train_index[label])
+    count = np.where(count == 0, 0.0001, count)
+    prob = count / len(test_index[label])
     
     return prob
 
@@ -142,9 +142,9 @@ data = GetLabelData(f)
 test_label_data, test_label_num = data
 
 train_index = GetIndexOfEachLabel(train_label_data)
+test_index = GetIndexOfEachLabel(test_label_data)
 
 # Tally the frequency of the values of each pixel into 32 bins
-train_image_classify = np.trunc(train_image_data / 8)
 test_image_classify = np.trunc(test_image_data / 8).astype(int)
 
 prob_each_bin = []
@@ -154,12 +154,12 @@ for label in range(10):
 data_num = 10000
 
 # Discrete mode
-# error = 0
-# for i in range(data_num):
-#     predict_val = GetPredictValueDC(i)
-#     if predict_val != test_label_data[i]:
-#         error += 1
-# print(f'Discrete mode \nError rate : {error / data_num}')
+error = 0
+for i in range(data_num):
+    predict_val = GetPredictValueDC(i)
+    if predict_val != test_label_data[i]:
+        error += 1
+print(f'Discrete mode \nError rate : {error / data_num}')
 
 for label in range(10):
     print(f'{label}：')
