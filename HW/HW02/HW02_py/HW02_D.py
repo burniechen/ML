@@ -44,7 +44,7 @@ def GetIndexOfEachLabel(label_data):
         for label in label_data:
             if label == num:
                 index_m[num].append(index)
-            index +=1
+            index += 1
         index = 0
         
     return index_m
@@ -66,8 +66,8 @@ def GetProbOfEachBin(label):
         tmp_c = []
 
     count = np.array(count).transpose()
-    prob = np.where(count == 0, 0.0001, count)
-    prob = prob / len(train_index[label])
+    count = np.where(count == 0, 0.000001, count)
+    prob = count / len(train_index[label])
     
     return prob
 
@@ -75,12 +75,10 @@ def GetPosteriorDC(index, label):
     posterior = 0
 
     prior = np.log(len(train_index[label]) / train_label_num)
-
-    prob_each_bin = GetProbOfEachBin(label)
     
     pixel = 0
     for b in test_image_classify[index]:
-        posterior += np.log(prob_each_bin[pixel][b]) + prior
+        posterior += np.log(prob_each_bin[label][pixel][b]) + prior
         pixel += 1
 
     return posterior
@@ -100,6 +98,24 @@ def GetPredictValueDC(i):
         posterior_normalize.append(normal)
         
     return np.argmin(posterior_normalize)
+
+def PrintClassifyImage(label):
+    image = []
+    for pixel in range(784):
+        black = np.sum(prob_each_bin[label][pixel][16:32])
+        white = np.sum(prob_each_bin[label][pixel][:16])
+
+        if black > white:
+            image.append(1)
+        else:
+            image.append(0)
+
+    image = np.array(image).reshape(28, 28)
+    
+    for i in range(28):
+        for j in range(28):
+            print(image[i][j], " ", end = "")
+        print('\n')
 
 train_image = 'train-images-idx3-ubyte.gz'
 train_label = 'train-labels-idx1-ubyte.gz'
@@ -131,12 +147,21 @@ train_index = GetIndexOfEachLabel(train_label_data)
 train_image_classify = np.trunc(train_image_data / 8)
 test_image_classify = np.trunc(test_image_data / 8).astype(int)
 
+prob_each_bin = []
+for label in range(10):
+    prob_each_bin.append(GetProbOfEachBin(label))
+
 data_num = 10000
 
 # Discrete mode
-error = 0
-for i in range(data_num):
-    predict_val = GetPredictValueDC(i)
-    if predict_val != test_label_data[i]:
-        error += 1
-print(f'Discrete mode \nError rate : {error / data_num}')
+# error = 0
+# for i in range(data_num):
+#     predict_val = GetPredictValueDC(i)
+#     if predict_val != test_label_data[i]:
+#         error += 1
+# print(f'Discrete mode \nError rate : {error / data_num}')
+
+for label in range(10):
+    print(f'{label}：')
+    PrintClassifyImage(label)
+    print('\n\n\n')
