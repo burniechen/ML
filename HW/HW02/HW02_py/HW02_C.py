@@ -89,7 +89,7 @@ test_label_data, test_label_num = data
 train_index = GetIndexOfEachLabel(train_label_data)
 train_mean_var = GetMeanVarOfEachPixel(train_image_data, train_index)
 
-data_num = 10
+data_num = 10000
 
 # Continuous mode
 error = 0

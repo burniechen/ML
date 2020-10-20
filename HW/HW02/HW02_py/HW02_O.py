@@ -29,9 +29,12 @@ for i in range(len(data)):
     N, m = GetSuccessCount(i)
     p = m / N
     likelihood = BinomialCoef(N, m) * pow(p, m) * pow((1 - p), N - m)
+
     print(f'case {i+1}: {data[i]}')
     print(f'Likelihood: {likelihood}')
     print(f'Beta prior: a = {a}, b = {b}')
+
     a += m
     b += N - m
+    
     print(f'Beta posterior: a = {a}, b = {b}\n')
