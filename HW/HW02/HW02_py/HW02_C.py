@@ -61,6 +61,16 @@ def GetPredictValue(i):
 
     return ans
 
+def PrintClassifyImage(label):
+    train_mean_var_reshape = np.array(train_mean_var).reshape(10, 2, row, column)
+    for i in range(row):
+        for j in range(column):
+            if (train_mean_var_reshape[label][0][i][j] > 128):
+                print(1, "", end="")
+            else:
+                print(0, "", end="")
+        print("")
+
 train_image = 'train-images-idx3-ubyte.gz'
 train_label = 'train-labels-idx1-ubyte.gz'
 
@@ -88,6 +98,7 @@ test_label_data, test_label_num = data
 # Get mean & variance for Gaussion Distribution & Prior
 train_index = GetIndexOfEachLabel(train_label_data)
 train_mean_var = GetMeanVarOfEachPixel(train_image_data, train_index)
+print(np.array(train_mean_var).shape)
 
 data_num = 10000
 
@@ -98,3 +109,8 @@ for i in range(data_num):
     if predict_val != test_label_data[i]:
         error += 1
 print(f'Error rate : {error / data_num}')
+
+for label in range(10):
+    print(f'{label}：\n')
+    PrintClassifyImage(label)
+    print('\n')
