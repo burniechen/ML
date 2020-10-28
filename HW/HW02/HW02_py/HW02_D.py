@@ -73,7 +73,7 @@ def PrintClassifyImage(label):
     
     for i in range(28):
         for j in range(28):
-            print(image[i][j], "", end = "")
+            print(image[i][j], end = "")
         print("")
 
 train_image = 'train-images-idx3-ubyte.gz'

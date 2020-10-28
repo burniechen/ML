@@ -66,9 +66,9 @@ def PrintClassifyImage(label):
     for i in range(row):
         for j in range(column):
             if (train_mean_var_reshape[label][0][i][j] > 128):
-                print(1, "", end="")
+                print(1, end="")
             else:
-                print(0, "", end="")
+                print(0, end="")
         print("")
 
 train_image = 'train-images-idx3-ubyte.gz'
@@ -98,7 +98,6 @@ test_label_data, test_label_num = data
 # Get mean & variance for Gaussion Distribution & Prior
 train_index = GetIndexOfEachLabel(train_label_data)
 train_mean_var = GetMeanVarOfEachPixel(train_image_data, train_index)
-print(np.array(train_mean_var).shape)
 
 data_num = 10000
 
