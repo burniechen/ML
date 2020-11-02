@@ -10,25 +10,6 @@ def GetDesignMatrix(x, n):
         x_m.append(pow(x, i))
     return np.array(x_m).reshape(1, n)
 
-def PlotGroundTruth(b, num):
-    plt.xlim(-2, 2)
-    plt.ylim(-30, 30)
-
-    x_points = np.linspace(-2, 2, num)
-
-    mean_y = []
-    # var_y = []
-    for p in x_points:
-        P = GetDesignMatrix(p, n)
-        val = P.dot(w)
-        mean_y.append(val)
-
-    mean_y = np.array(mean_y).reshape(num, )
-
-    plt.plot(x_points, mean_y, 'k')
-    plt.plot(x_points, mean_y + a, 'r')
-    plt.plot(x_points, mean_y - a, 'r')
-
 def PlotIncomes(incomes, incomes_m, incomes_v, num):
     plt.xlim(-2, 2)
     plt.ylim(-30, 30)
@@ -158,7 +139,7 @@ plt.figure(figsize=(10, 8))
 
 ax1 = plt.subplot(221)
 ax1.set_title("Ground Truth")
-PlotGroundTruth(b, num)
+PlotIncomes(np.array([[[], []]]), w, 0, num)
 
 ax2 = plt.subplot(222)
 ax2.set_title("Predict Result")
