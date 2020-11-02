@@ -24,92 +24,55 @@ def PlotIncomes(incomes, incomes_m, incomes_v, num):
         mean_y.append(val)
 
         Pt = np.transpose(P)
-        val = a + P.dot(incomes_v).dot(Pt)
+        val = a_var + P.dot(incomes_v).dot(Pt)
         var_y.append(val)
 
     mean_y = np.array(mean_y).reshape(num, )
     var_y = np.array(var_y).reshape(num, )
         
-    plt.plot(incomes[:, 0], incomes[:, 1], 'o')
+    plt.plot(incomes[:, 0], incomes[:, 1], '.')
     plt.plot(x_points, mean_y, 'k')
     plt.plot(x_points, mean_y + var_y, 'r')
     plt.plot(x_points, mean_y - var_y, 'r')
 
 b = int(input("b: "))
 n = int(input("n: "))
-a = float(input("a: "))
+a_var = float(input("a: "))
 w = np.zeros((n, )) # 1*n
 for i in range(n):
     w[i] = float(input("w" + str(i) + ": "))
+
+a = 1/a_var
+S = b * np.identity(n)
 
 incomes_10 = np.zeros((10, 2))
 incomes_50 = np.zeros((50, 2))
 all_incomes = []
 
-# First
-x, y = PolynomialBasis(n, w, a)
-X = GetDesignMatrix(x, n) # 1*n
-Xt = X.reshape(n, 1) # n*1
-S = b * np.identity(n) # n*n
+prior_mean = np.zeros((n, 1))
+prior_var = inv(S)
 
-lam = a * Xt.dot(X) + S # n*n
-
-prior_mean = 0
-prior_var = a
-
-init_posterior_mean = a * inv(lam).dot(Xt) * y # 4*1
-init_posterior_var = inv(lam)
-
-predict_mean = X.dot(prior_mean)
-predict_var = 1/a + X.dot(inv(lam)).dot(Xt)
-
-incomes_10[0] = [x, y]
-incomes_50[0] = [x, y]
-all_incomes.append([x, y])
-
-# second
-x, y = PolynomialBasis(n, w, a)
-X = GetDesignMatrix(x, n)
-Xt = X.reshape(n, 1)
-S = inv(init_posterior_var)
-
-lam = a * Xt.dot(X) + S
-
-prior_mean = init_posterior_mean
-prior_var = init_posterior_var
-
-posterior_mean = inv(lam).dot((a * Xt * y + S.dot(prior_mean)))
-posterior_var = inv(lam)
-
-predict_mean = X.dot(prior_mean)
-predict_var = 1/a + X.dot(inv(lam)).dot(Xt)
-
-incomes_10[1] = [x, y]
-incomes_50[1] = [x, y]
-all_incomes.append([x, y])
-
-# After Second
 flag = True
-iteration = 2
+iteration = 0
 
 while flag:
-    x, y = PolynomialBasis(n, w, a)
+    x, y = PolynomialBasis(n, w, a_var)
     X = GetDesignMatrix(x, n)
     Xt = X.reshape(n, 1)
-    S = inv(posterior_var)
 
     lam = a * Xt.dot(X) + S
-    
-    prior_mean = posterior_mean
-    prior_var = posterior_var
 
     posterior_mean = inv(lam).dot((a * Xt * y + S.dot(prior_mean)))
     posterior_var = inv(lam)
     print(posterior_mean)
 
     predict_mean = X.dot(prior_mean)
-    predict_var = 1/a + X.dot(inv(lam)).dot(Xt)
-    print(f'({predict_mean}, {predict_var})')
+    predict_var = a_var + X.dot(inv(lam)).dot(Xt)
+    print(f'({predict_mean[0][0]}, {predict_var[0][0]})')
+
+    prior_mean = posterior_mean
+    prior_var = posterior_var
+    S = inv(posterior_var)
 
     all_incomes.append([x, y])
 
@@ -125,14 +88,10 @@ while flag:
         incomes_50_m = posterior_mean
         incomes_50_v = posterior_var
     
-    # if np.abs(w[-1] - posterior_mean[-1]) < 0.1:
-    #     all_incomes = np.array(all_incomes)
-    #     flag = False
-    #     print(iteration)
-    if iteration == 500:
+    if iteration > 50 and np.abs(predict_var[0][0] - a_var) < 0.005:
         all_incomes = np.array(all_incomes)
         flag = False
-
+        print(iteration)
 
 num = 100
 plt.figure(figsize=(10, 8))
