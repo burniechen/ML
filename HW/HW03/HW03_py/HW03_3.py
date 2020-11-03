@@ -57,6 +57,7 @@ iteration = 0
 
 while flag:
     x, y = PolynomialBasis(n, w, a_var)
+    print(f'Add data point ({x}, {y}): \n')
     X = GetDesignMatrix(x, n)
     Xt = X.reshape(n, 1)
 
@@ -64,11 +65,22 @@ while flag:
 
     posterior_mean = inv(lam).dot((a * Xt * y + S.dot(prior_mean)))
     posterior_var = inv(lam)
-    print(posterior_mean)
+
+    print(f'Posterior mean: \n')
+    for m in posterior_mean:
+        print(m[0])
+
+    print(f'\nPosterior variance: \n')
+    for v in posterior_var:
+        for i in range(n):
+            print(v[i], end=", ")
+        print()
 
     predict_mean = X.dot(prior_mean)
     predict_var = a_var + X.dot(inv(lam)).dot(Xt)
-    print(f'({predict_mean[0][0]}, {predict_var[0][0]})')
+
+    print(f'\nPredict distribution ~ N({predict_mean[0][0]}, {predict_var[0][0]})')
+    print(f'-----------------------------------------------------')
 
     prior_mean = posterior_mean
     prior_var = posterior_var
@@ -91,7 +103,7 @@ while flag:
     if iteration > 50 and np.abs(predict_var[0][0] - a_var) < 0.005:
         all_incomes = np.array(all_incomes)
         flag = False
-        print(iteration)
+        print(f'Iteration times: {iteration}')
 
 num = 100
 plt.figure(figsize=(10, 8))
