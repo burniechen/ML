@@ -20,11 +20,11 @@ def PlotIncomes(incomes, incomes_m, incomes_v, num):
     var_y = []
     for p in x_points:
         P = GetDesignMatrix(p, n)
-        val = P.dot(incomes_m)
+        val = P @ incomes_m
         mean_y.append(val)
 
         Pt = np.transpose(P)
-        val = a_var + P.dot(incomes_v).dot(Pt)
+        val = a_var + P @ incomes_v @ Pt
         var_y.append(val)
 
     mean_y = np.array(mean_y).reshape(num, )
@@ -61,9 +61,9 @@ while flag:
     X = GetDesignMatrix(x, n)
     Xt = X.reshape(n, 1)
 
-    lam = a * Xt.dot(X) + S
+    lam = a * Xt @ X + S
 
-    posterior_mean = inv(lam).dot((a * Xt * y + S.dot(prior_mean)))
+    posterior_mean = inv(lam) @ (a * Xt * y + S @ prior_mean)
     posterior_var = inv(lam)
 
     print(f'Posterior mean: \n')
@@ -76,8 +76,8 @@ while flag:
             print(v[i], end=", ")
         print()
 
-    predict_mean = X.dot(prior_mean)
-    predict_var = a_var + X.dot(inv(lam)).dot(Xt)
+    predict_mean = X @ prior_mean
+    predict_var = 1/a + X @ inv(lam) @ Xt
 
     print(f'\nPredict distribution ~ N({predict_mean[0][0]}, {predict_var[0][0]})')
     print(f'-----------------------------------------------------')
@@ -110,7 +110,7 @@ plt.figure(figsize=(10, 8))
 
 ax1 = plt.subplot(221)
 ax1.set_title("Ground Truth")
-PlotIncomes(np.array([[[], []]]), w, 0, num)
+PlotIncomes(np.array([[[], []]]), w, np.zeros((n, n)), num)
 
 ax2 = plt.subplot(222)
 ax2.set_title("Predict Result")

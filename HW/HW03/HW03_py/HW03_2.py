@@ -2,8 +2,8 @@ import numpy as np
 
 from data_generator import UnivariateGaussian
 
-mean = int(input("Mean： "))
-var = int(input("Variance： "))
+mean = float(input("Mean： "))
+var = float(input("Variance： "))
 
 print(f'Data point source function: N({mean}, {var})\n')
 
