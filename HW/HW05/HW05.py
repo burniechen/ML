@@ -1,16 +1,19 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import optimize as opt
+from scipy.optimize import minimize
 
-def RQkernel(xa, xb, var, alpha, lengthscale):
+def RQkernel(xa, xb, var=1, alpha=1, lengthscale=1):
     return var * (1 + ((xa - xb) ** 2) / (2 * alpha * (lengthscale ** 2))) ** (-alpha)
 
-def GetLogLikelihood(X, Y, n, var, alpha, lengthscale):
+def GetLogLikelihood(args):
+    var, alpha, lengthscale = args
     K = np.zeros((row, row))
     for i in range(row):
         for j in range(row):
             K[i][j] = RQkernel(X[i], X[j], var, alpha, lengthscale)
             
-    return -0.5 * Y.T @ np.linalg.inv(K) @ Y -0.5 * np.log(np.abs(np.linalg.det(K))) - (n/2) * np.log(2 * np.pi) 
+    return -(-0.5 * Y.T @ np.linalg.inv(K) @ Y -0.5 * np.log(np.abs(np.linalg.det(K))) - (n/2) * np.log(2 * np.pi)) 
 
 f = open("input.data")
 input_data = f.read()
@@ -18,6 +21,7 @@ f.close()
 
 row = 34
 col = 2
+n = 34
 data = np.zeros((row, col))
 count = 0
 for xy in input_data.split("\n"):
@@ -57,17 +61,18 @@ for xs in sample:
 mean_y = np.array(mean_y)
 var_y = np.array(var_y)
 
+# Plotting
 x_m = np.arange(1, 101, 1)
 L_var_m = []
 L_alpha_m = []
 L_length_m = []
 
 for i in x_m:
-    L = GetLogLikelihood(X, Y, 34, i, 1, 1)
+    L = GetLogLikelihood([i, 1, 1])
     L_var_m.append(L)
-    L = GetLogLikelihood(X, Y, 34, 1, i, 1)
+    L = GetLogLikelihood([1, i, 1])
     L_alpha_m.append(L)
-    L = GetLogLikelihood(X, Y, 34, 1, 1, i)
+    L = GetLogLikelihood([1, 1, i])
     L_length_m.append(L)
 
 plt.figure(figsize=(10, 8))
@@ -76,7 +81,7 @@ plt.subplot(221)
 plt.title("Gaussian Process Regression")
 plt.plot(X, Y, '.')
 plt.plot(sample, mean_y, 'r')
-plt.fill_between(sample, mean_y - 1.96*(var_y**0.5), mean_y + 1.96*(var_y**0.05), color='pink')
+plt.fill_between(sample, mean_y - 1.96*(var_y**0.5), mean_y + 1.96*(var_y**0.5), color='pink')
 
 plt.subplot(222)
 plt.title("Parameter: variance")
@@ -91,3 +96,11 @@ plt.title("Parameter: lengthscale")
 plt.plot(x_m, L_length_m)
 
 plt.show()
+
+# Minimize negative marginal log-likelihood
+begin = np.array([1, 1, 1])
+res = minimize(fun=GetLogLikelihood, x0=begin, method='SLSQP')
+print(f'Negative marginal log-likelihood：{res.fun}')
+print(f'Variance：{res.x[0]}')
+print(f'Alpha：{res.x[1]}')
+print(f'Lengthscale：{res.x[2]}')
