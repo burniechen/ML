@@ -54,12 +54,12 @@ def NewtonMethod(w, A, Y, r=0.001):
             Hessian_inv = np.linalg.inv(Hessian)
             w_new = w + r * (Hessian_inv @ A.T @ (Y - LogisticF(w, A)))
 
-            if np.linalg.norm(Hessian_inv @ A.T @ (Y - LogisticF(w, A))) < 0.01:
+            if np.linalg.norm(Hessian_inv @ A.T @ (Y - LogisticF(w, A))) < 0.5:
                 flag = False
             else:
                 w = w_new
-    else:
-        w = GradientDescent(w, A, Y, r)
+        else:
+            w = GradientDescent(w, A, Y, r)
 
     return w
 
@@ -70,10 +70,9 @@ def Plot(D1, D2, w_in, A, title):
         plt.plot(D1[:, 0], D1[:, 1], 'o', color='red')
         plt.plot(D2[:, 0], D2[:, 1], 'o', color='blue')
     else:
-        sample = np.array([D1, D2]).reshape(n*2, 2)
         y_pred = LogisticF(w_in, A).reshape(n*2, )
-        cluster1 = sample[(y_pred < 0.5)]
-        cluster2 = sample[(y_pred >= 0.5)]
+        cluster1 = D1[(y_pred[:50] < 0.5)]
+        cluster2 = D2[(y_pred[50:] >= 0.5)]
 
         predict_c1 = cluster1[:, 0].size
         predict_c2 = cluster2[:, 0].size
@@ -84,7 +83,7 @@ def Plot(D1, D2, w_in, A, title):
             print(ele[0])
 
         print("\nConfusion Matrix:")
-        print("             Predict cluster 1 Prdict cluster 2")
+        print("             Predict cluster 1 Predict cluster 2")
         print(f'Is cluster 1       {predict_c1}                  {n - predict_c1}')
         print(f'Is cluster 2       {n - predict_c2}                  {predict_c2}\n')
 
