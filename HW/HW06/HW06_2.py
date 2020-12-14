@@ -5,6 +5,7 @@ import random
 from scipy.spatial.distance import pdist, squareform
 from numba import jit
 from scipy import linalg
+import matplotlib.pyplot as plt
 
 @jit
 def GetMeanIndex(k, mode=False):
@@ -64,7 +65,7 @@ def Mstep(GramMatrix, classify, k):
             
     return new_mean
 
-path = "ML_HW06/image2.png"
+path = "ML_HW06/image1.png"
 img = cv2.imread(path)
 
 row, col, channel = img.shape
@@ -87,10 +88,10 @@ NewKernel = np.exp(SpatialKernel + ImgKernel)
 # Gram matrix
 GramMatrix = squareform(NewKernel)
 
-k = 2
+k = 3
 
 # Mean index
-mean_index = GetMeanIndex(k, mode=True)
+mean_index = GetMeanIndex(k, mode=False)
 mean = GramMatrix[mean_index]
 
 gif = np.zeros((1, row, col))
@@ -104,6 +105,7 @@ InvSqrtDegree = np.linalg.inv(np.sqrt(Degree))
 NormalizedLap = InvSqrtDegree @ UnnormalizedLap @ InvSqrtDegree
 
 eig = linalg.eigh(NormalizedLap)
+# eig = linalg.eigh(UnnormalizedLap)
 
 U = eig[1][:, :k]
 norm_U = np.linalg.norm(U, axis=1)
@@ -148,3 +150,22 @@ for count in range(gif.shape[0]):
 colorful_gif = np.array(colorful_gif).reshape(gif.shape[0], row, col, 3)
 
 imageio.mimsave("sp.gif", colorful_gif, 'GIF', duration=0.5)
+
+if k == 2:
+    gif_reshape = gif.reshape(gif.shape[0], row*col)
+    cluster1_x = []
+    cluster1_y = []
+    cluster2_x = []
+    cluster2_y = []
+
+    for i in range(row*col):
+        if gif_reshape[-1][i] == 1:
+            cluster1_x.append(U[i][0])
+            cluster1_y.append(U[i][1])
+        else:
+            cluster2_x.append(U[i][0])
+            cluster2_y.append(U[i][1])
+            
+    plt.scatter(cluster1_x, cluster1_y, color='r')
+    plt.scatter(cluster2_x, cluster2_y)
+    plt.show()
