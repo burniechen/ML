@@ -64,7 +64,7 @@ def Mstep(GramMatrix, classify, k):
             
     return new_mean
 
-path = "ML_HW06/image1.png"
+path = "ML_HW06/image2.png"
 img = cv2.imread(path)
 
 row, col, channel = img.shape
@@ -87,10 +87,10 @@ NewKernel = np.exp(SpatialKernel + ImgKernel)
 # Gram matrix
 GramMatrix = squareform(NewKernel)
 
-k = 5
+k = 2
 
 # Mean index
-mean_index = GetMeanIndex(k, mode=False)
+mean_index = GetMeanIndex(k, mode=True)
 mean = GramMatrix[mean_index]
 
 gif = np.zeros((1, row, col))
